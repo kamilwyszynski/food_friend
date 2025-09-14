@@ -1,5 +1,6 @@
 import os
 import base64
+import json
 from openai import OpenAI
 from ..schemas.recipe import RecipeResponse
 from ..models.recipe import Recipe
@@ -53,8 +54,9 @@ class RecipeService:
         recipe = Recipe.from_response(response.output_parsed)
         
         self.save_recipe(recipe)
-            
-        return response.output_text
+        
+        # Return a serializable recipe object with id included
+        return recipe.to_response().to_dict()
 
     def generate_recipe_from_image_path(self, image_path: str) -> str:
         """Wrapper that encodes image from file path"""
@@ -65,3 +67,30 @@ class RecipeService:
         """Wrapper that encodes image from bytes"""
         encoded_image = encode_image_bytes(image_bytes)
         return self.generate_recipe_from_base64(encoded_image)
+
+    def update_recipe(self, recipe_id: int, updated: RecipeResponse) -> RecipeResponse:
+        """Update an existing recipe with new fields and return updated response."""
+        with Session() as db:
+            recipe: Recipe | None = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+            if recipe is None:
+                raise ValueError(f"Recipe with id {recipe_id} not found")
+
+            # Update basic fields
+            recipe.name = updated.name
+            recipe.cook_time = updated.cook_time
+
+            # Serialize ingredients and instructions to JSON strings
+            ingredients_data = [
+                {"name": i.name, "quantity": i.quantity, "unit": i.unit}
+                for i in updated.ingredients
+            ]
+            instructions_data = [s for s in updated.instructions if isinstance(s, str)]
+
+            recipe.ingredients = json.dumps(ingredients_data)
+            recipe.instructions = json.dumps(instructions_data)
+
+            db.add(recipe)
+            db.commit()
+            db.refresh(recipe)
+
+            return recipe.to_response()
