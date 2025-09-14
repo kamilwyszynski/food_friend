@@ -1,0 +1,205 @@
+{
+	"info": {
+		"_postman_id": "food-friend-api-collection",
+		"name": "Food Friend API",
+		"description": "API collection for testing Food Friend recipe generation endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Recipe",
+			"item": [
+				{
+					"name": "Generate Recipe from Base64 Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"image_base64\": \"{{sample_base64_image}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/recipe/generate/base64",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"recipe",
+								"generate",
+								"base64"
+							]
+						},
+						"description": "Generate a recipe from a base64 encoded image. The API will analyze the ingredients in the image and return a recipe."
+					},
+					"response": [
+						{
+							"name": "Successful Recipe Generation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"image_base64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/recipe/generate/base64",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"recipe",
+										"generate",
+										"base64"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"recipe\": \"Recipe Name: Vegetable Stir Fry\\n\\nIngredients:\\n- 2 cups mixed vegetables\\n- 1 tbsp olive oil\\n- 1 tsp soy sauce\\n\\nInstructions:\\n1. Heat oil in pan\\n2. Add vegetables\\n3. Stir fry for 5 minutes\\n4. Add soy sauce\\n\\nCook time: 10 minutes\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Generate Recipe from Image Upload",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Upload an image file containing ingredients"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/recipe/generate/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"recipe",
+								"generate",
+								"upload"
+							]
+						},
+						"description": "Upload an image file and generate a recipe based on the ingredients visible in the image."
+					},
+					"response": [
+						{
+							"name": "Successful Recipe Generation from Upload",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/path/to/sample/image.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/recipe/generate/upload",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"recipe",
+										"generate",
+										"upload"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"recipe\": \"Recipe Name: Quick Pasta\\n\\nIngredients:\\n- 200g pasta\\n- 2 tbsp olive oil\\n- 1 clove garlic\\n\\nInstructions:\\n1. Boil pasta\\n2. Heat oil and garlic\\n3. Mix together\\n\\nCook time: 15 minutes\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Endpoints for recipe generation from images"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "sample_base64_image",
+			"value": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+			"type": "string"
+		}
+	]
+}

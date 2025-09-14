@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text
 from ..models.base import Base
-from ..schemas.recipe import RecipeResponse
+from ..schemas.recipe import RecipeResponse, Ingredient
+import json
 
 class Recipe(Base):
     __tablename__ = "recipes"
@@ -21,12 +22,40 @@ class Recipe(Base):
 
     @staticmethod
     def from_response(response: RecipeResponse):
+        # Store as JSON strings (canonical format)
+        ingredients_data = [
+            {
+                "name": ingredient.name,
+                "quantity": ingredient.quantity,
+                "unit": ingredient.unit,
+            }
+            for ingredient in response.ingredients
+        ]
+
         return Recipe(
             name=response.name,
-            ingredients=str(response.ingredients),
-            instructions=response.instructions,
+            ingredients=json.dumps(ingredients_data),
+            instructions=json.dumps([
+                step for step in response.instructions
+                if isinstance(step, str) and step.strip()
+            ]),
             cook_time=response.cook_time,
-            user_id=-1
+            user_id=-1,
+        )
+
+    def to_response(self) -> RecipeResponse:
+        """Convert Recipe model to RecipeResponse using JSON-only storage."""
+        ingredients_data = json.loads(self.ingredients) if self.ingredients else []
+        ingredients = [Ingredient(**ingredient) for ingredient in ingredients_data]
+
+        instructions = json.loads(self.instructions) if self.instructions else []
+
+        return RecipeResponse(
+            name=self.name or "Unnamed Recipe",
+            ingredients=ingredients,
+            instructions=instructions,
+            cook_time=self.cook_time or 0,
+            id=self.id,
         )
 
 

@@ -13,3 +13,9 @@ async def generate_recipe_from_upload(file: UploadFile = File(...)):
     service = RecipeService()
     image_bytes = await file.read()
     return {"recipe": service.generate_recipe_from_image_bytes(image_bytes)}
+
+@router.get("/history")
+def get_recipe_history():
+    service = RecipeService()
+    recipes = service.get_all_recipes()
+    return {"recipes": [recipe.to_response().to_dict() for recipe in recipes]}

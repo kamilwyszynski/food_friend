@@ -22,6 +22,10 @@ class RecipeService:
             db.commit()
             db.refresh(recipe)
 
+    def get_all_recipes(self, user_id: int = -1) -> list[Recipe]:
+        with Session() as db:
+            return db.query(Recipe).filter(Recipe.user_id == user_id).all()
+
     def generate_recipe(self, ingredients: str) -> str:
 
         response = self.client.responses.parse(
