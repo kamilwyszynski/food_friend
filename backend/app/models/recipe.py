@@ -11,9 +11,10 @@ class Recipe(Base):
     ingredients = Column(Text)
     instructions = Column(Text)
     cook_time = Column(Integer)
-    user_id = Column(Integer)
+    # Store Supabase user sub (string)
+    user_id = Column(String)
 
-    def __init__(self, name, ingredients, instructions, cook_time, user_id=-1):
+    def __init__(self, name, ingredients, instructions, cook_time, user_id=""):
         self.name = name
         self.ingredients = ingredients
         self.instructions = instructions
@@ -40,7 +41,7 @@ class Recipe(Base):
                 if isinstance(step, str) and step.strip()
             ]),
             cook_time=response.cook_time,
-            user_id=-1,
+            user_id="",
         )
 
     def to_response(self) -> RecipeResponse:

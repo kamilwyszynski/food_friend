@@ -5,3 +5,5 @@ sqlalchemy
 psycopg2-binary
 uvicorn
 python-multipart
+PyJWT[crypto]
+supabase

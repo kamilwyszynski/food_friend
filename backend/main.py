@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from app.routers import recipe
+from app.routers import preferences as preferences_router
 
 load_dotenv()
 print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")  # Should print your DB URL
@@ -14,6 +15,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.include_router(recipe.router, prefix="/api/v1")
+app.include_router(preferences_router.router, prefix="/api/v1")
 
 if __name__ == "__main__":
     recipe_service = RecipeService()

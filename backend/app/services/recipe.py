@@ -23,8 +23,10 @@ class RecipeService:
             db.commit()
             db.refresh(recipe)
 
-    def get_all_recipes(self, user_id: int = -1) -> list[Recipe]:
+    def get_all_recipes(self, user_id: str | None = None) -> list[Recipe]:
         with Session() as db:
+            if user_id is None or user_id == "":
+                return db.query(Recipe).filter((Recipe.user_id == None) | (Recipe.user_id == "")).all()
             return db.query(Recipe).filter(Recipe.user_id == user_id).all()
 
     def generate_recipe(self, ingredients: str) -> str:
@@ -37,7 +39,7 @@ class RecipeService:
 
         return response.output_text
     
-    def generate_recipe_from_base64(self, base64_image: str) -> str:
+    def generate_recipe_from_base64(self, base64_image: str, user_sub: str | None = None) -> dict:
         """Base method that generates recipe from base64 encoded image"""
         response = self.client.responses.parse(
             model=os.getenv("OPENAI_MODEL"),
@@ -52,6 +54,8 @@ class RecipeService:
         )
 
         recipe = Recipe.from_response(response.output_parsed)
+        if user_sub:
+            recipe.user_id = user_sub
         
         self.save_recipe(recipe)
         
@@ -63,10 +67,10 @@ class RecipeService:
         encoded_image = encode_image(image_path)
         return self.generate_recipe_from_base64(encoded_image)
 
-    def generate_recipe_from_image_bytes(self, image_bytes: bytes) -> str:
+    def generate_recipe_from_image_bytes(self, image_bytes: bytes, user_sub: str | None = None) -> dict:
         """Wrapper that encodes image from bytes"""
         encoded_image = encode_image_bytes(image_bytes)
-        return self.generate_recipe_from_base64(encoded_image)
+        return self.generate_recipe_from_base64(encoded_image, user_sub)
 
     def update_recipe(self, recipe_id: int, updated: RecipeResponse) -> RecipeResponse:
         """Update an existing recipe with new fields and return updated response."""

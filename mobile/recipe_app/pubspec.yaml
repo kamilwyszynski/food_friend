@@ -38,6 +38,7 @@ dependencies:
   # Camera and HTTP dependencies for recipe generation
   image_picker: ^1.0.4
   http: ^1.1.0
+  supabase_flutter: ^2.10.0
 
 dev_dependencies:
   flutter_test:
