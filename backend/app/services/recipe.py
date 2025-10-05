@@ -5,6 +5,7 @@ from openai import OpenAI
 from ..schemas.recipe import RecipeResponse
 from ..models.recipe import Recipe
 from ..database import Session
+from sqlalchemy import or_
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -98,3 +99,41 @@ class RecipeService:
             db.refresh(recipe)
 
             return recipe.to_response()
+
+    def search_recipes(self, query: str, user_id: str) -> list[Recipe]:
+        """Search user's recipes by name, ingredients JSON, or instructions JSON (case-insensitive)."""
+        like = f"%{query}%"
+        with Session() as db:
+            return (
+                db.query(Recipe)
+                .filter(
+                    Recipe.user_id == user_id,
+                    or_(
+                        Recipe.name.ilike(like),
+                        Recipe.ingredients.ilike(like),
+                        Recipe.instructions.ilike(like),
+                    ),
+                )
+                .all()
+            )
+
+    def clone_recipe(self, recipe_id: int, user_id: str) -> RecipeResponse:
+        """Clone a recipe into a new one owned by the given user with 'Remix of' name."""
+        with Session() as db:
+            src: Recipe | None = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+            if src is None:
+                raise ValueError(f"Recipe with id {recipe_id} not found")
+
+            cloned = Recipe(
+                name=f"Remix of {src.name}" if src.name else "Remix",
+                ingredients=src.ingredients,
+                instructions=src.instructions,
+                cook_time=src.cook_time,
+                user_id=user_id,
+            )
+
+            db.add(cloned)
+            db.commit()
+            db.refresh(cloned)
+
+            return cloned.to_response()

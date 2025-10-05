@@ -57,3 +57,32 @@ def update_recipe(recipe_id: int, updated_recipe: RecipeResponse, user=Depends(g
         return updated.to_dict()
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/search")
+def search_recipes(q: str, user=Depends(get_current_user)):
+    service = RecipeService()
+    user_id = None
+    if isinstance(user, dict):
+        user_id = user.get("id") or user.get("sub")
+    else:
+        user_id = getattr(user, "id", None) or getattr(user, "sub", None)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    recipes = service.search_recipes(q, user_id)
+    return {"recipes": [r.to_response().to_dict() for r in recipes]}
+
+@router.post("/{recipe_id}/clone")
+def clone_recipe(recipe_id: int, user=Depends(get_current_user)):
+    service = RecipeService()
+    user_id = None
+    if isinstance(user, dict):
+        user_id = user.get("id") or user.get("sub")
+    else:
+        user_id = getattr(user, "id", None) or getattr(user, "sub", None)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    try:
+        cloned = service.clone_recipe(recipe_id, user_id)
+        return cloned.to_dict()
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

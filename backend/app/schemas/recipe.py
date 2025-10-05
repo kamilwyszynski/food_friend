@@ -35,3 +35,11 @@ class RecipeResponse(BaseModel):
             result["id"] = self.id
             
         return result
+
+class RecipeSchema(BaseModel):
+    id: int
+    name: str
+    ingredients: list[Ingredient]
+    instructions: list[str]
+    cook_time: int
+    user_id: str | None = None
