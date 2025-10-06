@@ -142,6 +142,45 @@
                 }
             ],
             "description": "Endpoints for recipe generation from images"
+        },
+        {
+            "name": "Chat",
+            "item": [
+                {
+                    "name": "Send Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Content-Type", "value": "application/json" },
+                            { "key": "Authorization", "value": "Bearer {{access_token}}" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"message\": \"What's a quick dinner?\",\n  \"session_id\": \"{{chat_session_id}}\"\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/chat",
+                            "host": ["{{base_url}}"],
+                            "path": ["api","v1","chat"]
+                        },
+                        "description": "Send a chat message. Stores returned session_id in collection variable chat_session_id."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const json = pm.response.json();",
+                                    "if (json && json.session_id) { pm.collectionVariables.set('chat_session_id', json.session_id); }"
+                                ]
+                            }
+                        }
+                    ],
+                    "response": []
+                }
+            ]
         }
     ],
     "event": [
@@ -155,6 +194,7 @@
         { "key": "supabase_anon_key", "value": "<YOUR_SUPABASE_ANON_KEY>", "type": "string" },
         { "key": "auth_email", "value": "you@example.com", "type": "string" },
         { "key": "auth_password", "value": "yourStrongPassword", "type": "string" },
-        { "key": "access_token", "value": "", "type": "string" }
+        { "key": "access_token", "value": "", "type": "string" },
+        { "key": "chat_session_id", "value": "", "type": "string" }
     ]
 }

@@ -2,8 +2,12 @@ openai
 python-dotenv
 fastapi
 sqlalchemy
-psycopg2-binary
+psycopg[binary,pool]>=3.0.0
 uvicorn
 python-multipart
 PyJWT[crypto]
 supabase
+langgraph>=0.2.0
+langgraph-checkpoint-postgres>=2.0.0
+langchain-core>=0.2.0
+langchain-openai>=0.1.0
