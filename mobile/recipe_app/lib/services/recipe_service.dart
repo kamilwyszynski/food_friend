@@ -39,6 +39,17 @@ class RecipeService {
     }
   }
 
+  Future<Recipe> getRecipeById(int id) async {
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/recipe/$id');
+    final response = await _api.get(uri);
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+      return Recipe.fromJson(jsonMap);
+    } else {
+      throw Exception('Failed to fetch recipe: ${response.statusCode}');
+    }
+  }
+
   Future<Recipe> updateRecipe(int id, Recipe recipe) async {
     final uri = Uri.parse('${AppConfig.apiBaseUrl}/recipe/$id');
 

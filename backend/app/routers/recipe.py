@@ -2,6 +2,8 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
 from ..services.recipe import RecipeService
 from ..schemas.recipe import RecipeResponse
 from ..auth import get_current_user
+from ..database import Session
+from ..models.recipe import Recipe
 
 router = APIRouter(prefix="/recipe", tags=["recipe"])
 
@@ -57,6 +59,22 @@ def update_recipe(recipe_id: int, updated_recipe: RecipeResponse, user=Depends(g
         return updated.to_dict()
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/{recipe_id}")
+def get_recipe(recipe_id: int, user=Depends(get_current_user)):
+    """
+    Fetch a single recipe by id. Access allowed if:
+    - recipe.user_id is empty (preview recipe), or
+    - recipe.user_id matches the current user
+    """
+    user_sub = user.get("sub") if isinstance(user, dict) else None
+    with Session() as db:
+        rec: Recipe | None = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+        if rec is None:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+        if rec.user_id and user_sub and rec.user_id != user_sub:
+            raise HTTPException(status_code=403, detail="Forbidden")
+        return rec.to_response().to_dict()
 
 @router.get("/search")
 def search_recipes(q: str, user=Depends(get_current_user)):

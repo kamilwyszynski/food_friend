@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'capture_screen.dart';
+import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
 
@@ -56,7 +57,7 @@ class _HomeShellState extends State<HomeShell> {
             Navigator(
               key: _navKeys[1],
               onGenerateRoute: (settings) => MaterialPageRoute(
-                builder: (_) => const CaptureScreen(),
+                builder: (_) => const ChatScreen(),
               ),
             ),
             // Profile tab

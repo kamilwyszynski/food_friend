@@ -72,6 +72,35 @@ class ApiClient {
     return res;
   }
 
+  Future<http.Response> post(
+    Uri uri, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) async {
+    var token = await _requireToken();
+    var res = await http.post(
+      uri,
+      headers: _withAuth(headers, token),
+      body: body,
+      encoding: encoding,
+    );
+    if (res.statusCode != 401) return res;
+
+    await _refreshSession();
+    final session = _supabase.auth.currentSession;
+    if (session == null) {
+      return res;
+    }
+    res = await http.post(
+      uri,
+      headers: _withAuth(headers, session.accessToken),
+      body: body,
+      encoding: encoding,
+    );
+    return res;
+  }
+
   Future<http.StreamedResponse> postMultipart(
     Uri uri, {
     required List<http.MultipartFile> files,

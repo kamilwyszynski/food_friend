@@ -137,3 +137,49 @@ class RecipeService:
             db.refresh(cloned)
 
             return cloned.to_response()
+
+    def create_recipe(self, recipe_json: dict, user_id: str) -> RecipeResponse:
+        """Create and persist a recipe from RecipeResponse-like JSON for the given user."""
+        # Build RecipeResponse to reuse serialization logic
+        from ..schemas.recipe import RecipeResponse, Ingredient
+
+        ingredients = [Ingredient(**i) for i in recipe_json.get("ingredients", [])]
+        rr = RecipeResponse(
+            name=recipe_json.get("name", "Unnamed Recipe"),
+            ingredients=ingredients,
+            instructions=recipe_json.get("instructions", []),
+            cook_time=recipe_json.get("cook_time", 0),
+        )
+
+        recipe = Recipe.from_response(rr)
+        recipe.user_id = user_id
+
+        with Session() as db:
+            db.add(recipe)
+            db.commit()
+            db.refresh(recipe)
+            return recipe.to_response()
+
+    def create_preview_recipe(self, recipe_json: dict) -> dict:
+        """Persist a preview-only recipe (no owner) and return minimal summary.
+
+        Returns: { id, name, cook_time }
+        """
+        from ..schemas.recipe import RecipeResponse, Ingredient
+
+        ingredients = [Ingredient(**i) for i in recipe_json.get("ingredients", [])]
+        rr = RecipeResponse(
+            name=recipe_json.get("name", "Unnamed Recipe"),
+            ingredients=ingredients,
+            instructions=recipe_json.get("instructions", []),
+            cook_time=recipe_json.get("cook_time", 0),
+        )
+
+        recipe = Recipe.from_response(rr)
+        recipe.user_id = ""  # preview-only
+
+        with Session() as db:
+            db.add(recipe)
+            db.commit()
+            db.refresh(recipe)
+            return {"id": recipe.id, "name": recipe.name, "cook_time": recipe.cook_time or 0}
